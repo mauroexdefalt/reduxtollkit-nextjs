@@ -1,51 +1,125 @@
-import React,{useEffect} from 'react'
+import React, { useEffect, useState } from 'react'
 import { Container, Small, Large } from "./styles";
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  incrementQuantity,
-  decrementQuantity,
-  removeFromCart,
-  addToCart,
+    incrementQuantity,
+    decrementQuantity,
+    removeFromCart,
+    addToCart,
 } from '../../redux/carrinho.slice';
+import axios from 'axios';
 
 import CategoryCard from '../../componentes/CategoryCard'
 
 export default function Home() {
 
-    const carrinho = useSelector((state) => state.cart);
-    const dispatch = useDispatch();
+    const [arr, setArr] = useState([])
+    const [data, setData] = useState([])
+    const [count, setCount] = useState(10)
+
 
 
     useEffect(() => {
-          
+        axios.get('http://localhost:5000/pokemon').then((res) => {
+            setArr(res.data)
+            setData(res.data.filter((item, index) => index <= count))
+        })
+
     }, [])
+
+    useEffect(() => {
+        setData(arr.filter((item, index) => index <= count))
+      
+    }, [count])
+
+
+    useEffect(() => {
+        const intersectionObserver = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                console.log('fui observado', entries.some(entry => !entry.isIntersecting))
+                
+                
+                
+                    
+                    setCount((count) => count + 40);
+            
+            }
+        })
+        intersectionObserver.observe(document.querySelector('#sentinela'));
+        return () => intersectionObserver.disconnect();
+    }, []);
+
+
+
+
+
+    function details(e) {
+
+        console.log(e)
+
+    }
+
+
+    function replacer(e, item) {
+
+
+        if (String(e).length === 1) {
+            return (
+              
+                    <CategoryCard key={e} im={`http://localhost:3000/images/00${e}.png`} data={item} />
+               
+            )
+        }
+
+        if (String(e).length === 2) {
+            return (
+              
+                    <CategoryCard key={e} im={`http://localhost:3000/images/0${e}.png`} name="Xbox" data={item} />
+               
+            )
+        }
+
+        return (
+          
+                <CategoryCard key={e} im={`http://localhost:3000/images/${e}.png`} name="Xbox" data={item} />
+          
+        )
+    }
+
+
+
 
 
     return (
         <Container>
-            <button onClick={()=>{dispatch(addToCart())}}>  teste</button>
-            {carrinho.value}
-       
+         
+
+            {count}<br />
+            {data.length}
             <Small>
+                {data ? data.map((item, index) =>
 
-                <CategoryCard image="https://imgur.com/uKQqsuA.png" name="Xbox" />
-                <CategoryCard image="https://imgur.com/3Y1DLYC.png" name="PS5" />
-                <CategoryCard image="https://imgur.com/Dm212HS.png" name="Switch" />
+
+                    replacer(index + 1, item)
+
+
+                ) :
+                    ''
+                }
             </Small>
-            <Large>
-                <CategoryCard image="https://imgur.com/qb6IW1f.png" name="PC" />
-                <CategoryCard
-                    image="https://imgur.com/HsUfuRU.png"
-                    name="Accessories"
-                />
-            </Large>
-
-
-
-        </Container>
+          
+            <div style={{
+                display: 'flex',                
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#181b1d'
+            }}
+            id="sentinela">
+                <img height='200px' src={'http://localhost:3000/load_pokeball.gif'} />
+            </div>
+        </Container >
     )
-
-
 
 }
 
